@@ -1,0 +1,251 @@
+{
+  "artifact": "Deterministic student-analysis sample",
+  "data_source": "Synthetic demo profiles only; no NVIDIA/NIM call is made.",
+  "request": {
+    "student_code": "OU12001"
+  },
+  "response": {
+    "student_code": "OU12001",
+    "summary": "OU12001 has a low indicator (risk score 26/100) based on academic and engagement signals.",
+    "risk_assessment": {
+      "id": "OU12001",
+      "course": "EEE",
+      "region": "North West",
+      "education": "HE Qualification",
+      "age_band": "35-55",
+      "credits": 90,
+      "attempts": 0,
+      "score": 33.3,
+      "score_trend": 1.7,
+      "clicks": 584,
+      "engagement_trend": 13.3,
+      "active_weeks": 10,
+      "completion": 0.5,
+      "final_result": "Withdrawn",
+      "last_activity": "11 days ago",
+      "risk_score": 26,
+      "level": "LOW",
+      "withdrawal_probability": 20.3,
+      "priority_score": 28.9,
+      "synthetic": true
+    },
+    "performance_analysis": {
+      "agent": "performance_analysis",
+      "assessment_average": 33.3,
+      "assessment_trend": 1.7,
+      "engagement_clicks": 584,
+      "engagement_trend": 13.3,
+      "completion": 0.5,
+      "summary": "Assessment results are stable; learning activity is increasing.",
+      "evidence": [
+        "Assessment average 33.3% (+1.7 trend)",
+        "VLE activity 584 clicks (+13.3 trend)",
+        "Completion 50%"
+      ]
+    },
+    "risk_analysis": {
+      "agent": "risk_assessment",
+      "risk_score": 26,
+      "level": "LOW",
+      "withdrawal_indicator": 20.3,
+      "priority_score": 28.9,
+      "explainable_factors": [
+        "Low assessment average (33.3%)",
+        "Course completion below 50% (50%)"
+      ]
+    },
+    "support_recommendation": {
+      "agent": "intervention_recommendation",
+      "summary": "Recommended for advisor review.",
+      "actions": [
+        "Agree a manageable catch-up schedule for outstanding assessments."
+      ],
+      "evidence": [
+        "Assessment average 33.3% (trend +1.7)",
+        "VLE activity 584 clicks (trend +13.3)",
+        "Assessment completion 50%"
+      ],
+      "historical_cases": [
+        {
+          "id": "OU12158",
+          "similarity": 61,
+          "outcome": "Withdrawn"
+        },
+        {
+          "id": "OU12132",
+          "similarity": 58,
+          "outcome": "Pass"
+        },
+        {
+          "id": "OU12168",
+          "similarity": 54,
+          "outcome": "Pass"
+        }
+      ]
+    },
+    "agent_workflow": [
+      {
+        "agent": "performance_analysis",
+        "assessment_average": 33.3,
+        "assessment_trend": 1.7,
+        "engagement_clicks": 584,
+        "engagement_trend": 13.3,
+        "completion": 0.5,
+        "summary": "Assessment results are stable; learning activity is increasing.",
+        "evidence": [
+          "Assessment average 33.3% (+1.7 trend)",
+          "VLE activity 584 clicks (+13.3 trend)",
+          "Completion 50%"
+        ]
+      },
+      {
+        "agent": "risk_assessment",
+        "risk_score": 26,
+        "level": "LOW",
+        "withdrawal_indicator": 20.3,
+        "priority_score": 28.9,
+        "explainable_factors": [
+          "Low assessment average (33.3%)",
+          "Course completion below 50% (50%)"
+        ]
+      },
+      {
+        "agent": "intervention_recommendation",
+        "summary": "Recommended for advisor review.",
+        "actions": [
+          "Agree a manageable catch-up schedule for outstanding assessments."
+        ],
+        "evidence": [
+          "Assessment average 33.3% (trend +1.7)",
+          "VLE activity 584 clicks (trend +13.3)",
+          "Assessment completion 50%"
+        ],
+        "historical_cases": [
+          {
+            "id": "OU12158",
+            "similarity": 61,
+            "outcome": "Withdrawn"
+          },
+          {
+            "id": "OU12132",
+            "similarity": 58,
+            "outcome": "Pass"
+          },
+          {
+            "id": "OU12168",
+            "similarity": 54,
+            "outcome": "Pass"
+          }
+        ]
+      }
+    ],
+    "retrieved_cases": [
+      {
+        "id": "OU12158",
+        "course": "EEE",
+        "region": "North West",
+        "education": "HE Qualification",
+        "age_band": "55<",
+        "credits": 60,
+        "attempts": 0,
+        "score": 84.7,
+        "score_trend": -2.8,
+        "clicks": 461,
+        "engagement_trend": -24.6,
+        "active_weeks": 12,
+        "completion": 0.93,
+        "final_result": "Withdrawn",
+        "last_activity": "6 days ago",
+        "risk_score": 17,
+        "level": "LOW",
+        "withdrawal_probability": 13.3,
+        "priority_score": 11.1,
+        "synthetic": true,
+        "similarity": 61,
+        "keyword_match": 56,
+        "semantic_match": 72,
+        "similarities": [
+          "Keyword profile match 56%",
+          "Academic and engagement profile similarity 72%"
+        ]
+      },
+      {
+        "id": "OU12132",
+        "course": "EEE",
+        "region": "North West",
+        "education": "Post Graduate Qualification",
+        "age_band": "35-55",
+        "credits": 30,
+        "attempts": 0,
+        "score": 66.1,
+        "score_trend": -1.5,
+        "clicks": 426,
+        "engagement_trend": 31.3,
+        "active_weeks": 17,
+        "completion": 0.53,
+        "final_result": "Pass",
+        "last_activity": "9 days ago",
+        "risk_score": 3,
+        "level": "LOW",
+        "withdrawal_probability": 2.3,
+        "priority_score": 2.0,
+        "synthetic": true,
+        "similarity": 58,
+        "keyword_match": 52,
+        "semantic_match": 72,
+        "similarities": [
+          "Keyword profile match 52%",
+          "Academic and engagement profile similarity 72%"
+        ]
+      },
+      {
+        "id": "OU12168",
+        "course": "EEE",
+        "region": "North West",
+        "education": "Post Graduate Qualification",
+        "age_band": "0-35",
+        "credits": 90,
+        "attempts": 1,
+        "score": 61.3,
+        "score_trend": 0.9,
+        "clicks": 580,
+        "engagement_trend": -4.2,
+        "active_weeks": 9,
+        "completion": 0.51,
+        "final_result": "Pass",
+        "last_activity": "2 days ago",
+        "risk_score": 7,
+        "level": "LOW",
+        "withdrawal_probability": 5.5,
+        "priority_score": 4.5,
+        "synthetic": true,
+        "similarity": 54,
+        "keyword_match": 49,
+        "semantic_match": 67,
+        "similarities": [
+          "Keyword profile match 49%",
+          "Academic and engagement profile similarity 67%"
+        ]
+      }
+    ],
+    "evidence": [
+      "Assessment average 33.3% (+1.7 trend)",
+      "VLE activity 584 clicks (+13.3 trend)",
+      "Completion 50%"
+    ],
+    "key_factors": [
+      "Low assessment average (33.3%)",
+      "Course completion below 50% (50%)"
+    ],
+    "recommended_intervention": [
+      "Agree a manageable catch-up schedule for outstanding assessments."
+    ],
+    "confidence": "Heuristic indicator; review source data with the student.",
+    "limitations": "Synthetic example. Risk is a demonstration heuristic and is not a causal finding or validated prediction.",
+    "llm_used": false,
+    "judge": {
+      "status": "not_configured",
+      "approved": null
+    }
+  }
+}

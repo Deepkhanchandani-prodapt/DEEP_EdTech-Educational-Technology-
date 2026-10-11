@@ -1,0 +1,22 @@
+{
+  "relevance_label": "Same course as query profile; weak proxy for historical-case relevance, not advisor relevance judgment.",
+  "queries": 40,
+  "results": {
+    "hybrid": {
+      "queries": 40,
+      "precision_at_5": 0.45,
+      "mrr": 0.681
+    },
+    "semantic": {
+      "queries": 40,
+      "precision_at_5": 0.395,
+      "mrr": 0.617
+    },
+    "keyword": {
+      "queries": 40,
+      "precision_at_5": 0.475,
+      "mrr": 0.729
+    }
+  },
+  "warning": "Synthetic/default records limit these retrieval metrics; use expert-labeled institutional cases for valid evaluation."
+}
