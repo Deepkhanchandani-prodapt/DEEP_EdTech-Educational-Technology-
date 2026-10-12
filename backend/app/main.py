@@ -2,6 +2,7 @@ import csv
 import io
 import importlib.util
 import json
+import logging
 import math
 import os
 import random
@@ -528,10 +529,8 @@ def profile_terms(s):
 
 def hybrid_similar(source, pool, query_text="", limit=5):
     import re
-    import numpy as np
-    import chromadb
     from sklearn.feature_extraction.text import HashingVectorizer
-    from sklearn.metrics.pairwise import cosine_similarity
+    if not pool: return []
     documents={s.student_code:profile_terms(s).lower() for s in pool}
     query=(query_text or profile_terms(source)).lower()
     tokenize=lambda text: re.findall(r"[a-z0-9]+", text)
@@ -540,7 +539,6 @@ def hybrid_similar(source, pool, query_text="", limit=5):
     n=max(1,len(doc_terms))
     df={term:sum(term in set(tokens) for tokens in doc_terms.values()) for term in query_terms}
     average_length=sum(len(tokens) for tokens in doc_terms.values())/max(1,n)
-    if not pool: return []
     def structured_score(candidate):
         numeric=[(abs(candidate.score-source.score),100),(abs(candidate.score_trend-source.score_trend),60),(abs(candidate.clicks-source.clicks),1000),(abs(candidate.engagement_trend-source.engagement_trend),100),(abs(candidate.completion-source.completion),1),(abs(candidate.attempts-source.attempts),4),(abs(candidate.credits-source.credits),120),(abs(candidate.active_weeks-source.active_weeks),24)]
         numeric_similarity=sum(max(0,1-distance/max_range) for distance,max_range in numeric)/len(numeric)
@@ -554,27 +552,39 @@ def hybrid_similar(source, pool, query_text="", limit=5):
             value+=inverse*(frequency*2.2)/(frequency+1.2*(.25+.75*length/max(1,average_length)))
             normalizer+=inverse
         return value/max(1e-9,normalizer)
-    # Keep fixed-width local vectors in a persistent Chroma collection. SQL remains
-    # the source of truth for structured records and permissions.
+    # Use sparse local vectors for all profiles; only send moderate scoped pools
+    # to Chroma so a large workspace does not allocate hundreds of MB per search.
     vectorizer=HashingVectorizer(ngram_range=(1,2),n_features=2048,norm="l2",alternate_sign=False)
-    client=chromadb.PersistentClient(path=os.getenv("CHROMA_PATH", str(ROOT / "chroma")))
-    collection=client.get_or_create_collection("student_profiles", metadata={"hnsw:space":"cosine"})
     pool_codes=[s.student_code for s in pool]
-    pool_vectors=vectorizer.transform([documents[code] for code in pool_codes]).toarray().astype(float).tolist()
-    collection.upsert(ids=pool_codes, documents=[documents[code] for code in pool_codes], embeddings=pool_vectors,
-                      metadatas=[{"student_code":code} for code in pool_codes])
-    query_vector=vectorizer.transform([query]).toarray().astype(float)[0]
-    matches=collection.query(query_embeddings=[query_vector.tolist()],n_results=min(len(pool),max(300,limit*12)),where={"student_code":{"$in":pool_codes}},include=["metadatas"])
-    candidate_codes={metadata["student_code"] for metadata in matches["metadatas"][0]}
+    profile_vectors=vectorizer.transform([documents[code] for code in pool_codes])
+    query_vector=vectorizer.transform([query])
+    vector_scores=(profile_vectors @ query_vector.T).toarray().ravel()
+    candidate_codes=set(pool_codes)
+    if len(pool_codes)<=2500:
+        try:
+            import chromadb
+            client=chromadb.PersistentClient(path=os.getenv("CHROMA_PATH", str(ROOT / "chroma")))
+            collection=client.get_or_create_collection("student_profiles", metadata={"hnsw:space":"cosine"})
+            pool_vectors=profile_vectors.toarray().astype(float).tolist()
+            collection.upsert(ids=pool_codes, documents=[documents[code] for code in pool_codes], embeddings=pool_vectors,
+                              metadatas=[{"student_code":code} for code in pool_codes])
+            matches=collection.query(query_embeddings=[query_vector.toarray()[0].tolist()],n_results=min(len(pool),max(300,limit*12)),where={"student_code":{"$in":pool_codes}},include=["metadatas"])
+            candidate_codes={metadata["student_code"] for metadata in matches["metadatas"][0]}
+        except Exception as exc:
+            logging.getLogger(__name__).warning("ChromaDB is unavailable; using local sparse similarity for this request: %s", exc)
     shortlist=[s for s in pool if s.student_code in candidate_codes]
     if not shortlist: shortlist=pool
+    vector_index={code:index for index,code in enumerate(pool_codes)}
+    score_cache={}
     def scores(candidate):
+        if candidate.student_code in score_cache: return score_cache[candidate.student_code]
         keyword=keyword_score(candidate)
         structured=structured_score(candidate)
-        embedded=float(cosine_similarity(query_vector.reshape(1,-1),vectorizer.transform([documents[candidate.student_code]]).toarray())[0][0])
+        embedded=float(vector_scores[vector_index[candidate.student_code]])
         semantic=.55*max(0,embedded)+.45*structured
         hybrid=.3*semantic+.7*keyword
-        return keyword,semantic,hybrid
+        score_cache[candidate.student_code]=(keyword,semantic,hybrid)
+        return score_cache[candidate.student_code]
     ranked=sorted(shortlist,key=lambda s:scores(s)[2],reverse=True)[:limit]
     output=[]
     for candidate in ranked:
@@ -668,7 +678,7 @@ def similar(code: str,query: str="",course: str="",region: str="",education: str
     for attr,value in [("course",course),("region",region),("education",education),("age_band",age_band),("credits",credits),("attempts",attempts)]:
         if value not in ("",None): pool=[s for s in pool if getattr(s,attr)==value]
     out=hybrid_similar(source,pool,query,limit)
-    return {"query_student":source.student_code,"query":query or profile_terms(source),"method":"70% BM25 keyword ranking + 30% ChromaDB vector and structured profile similarity","embedding_model":"local HashingVectorizer embeddings stored and searched in persistent ChromaDB","items":out}
+    return {"query_student":source.student_code,"query":query or profile_terms(source),"method":"70% BM25 keyword ranking + 30% local vector and structured profile similarity (ChromaDB acceleration when available)","embedding_model":"local HashingVectorizer embeddings with persistent ChromaDB acceleration when available","items":out}
 
 def performance_agent(s):
     has_scores = s.completion > 0
